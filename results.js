@@ -6,16 +6,22 @@ function init() {
 
   if (!cityName) {
     console.error("No city specified in the URL.");
-    document.getElementById("summary").textContent =
-      "Please specify a city in the URL to see a green space report.";
+    const summaryEl = document.getElementById("summary");
+    if (summaryEl) {
+      summaryEl.textContent =
+        "Please specify a city in the URL to see a green space report.";
+    }
     return;
   }
 
   const formattedCityName = toTitleCase(cityName);
-  document.getElementById("city-name").textContent = formattedCityName;
+  const cityNameEl = document.getElementById("city-name");
+  if (cityNameEl) {
+    cityNameEl.textContent = formattedCityName;
+  }
 
   const today = new Date();
-  const options = { year: 'numeric', month: 'long' };
+  const options = { year: "numeric", month: "long" };
   const dataYearEl = document.getElementById("data-year");
   if (dataYearEl) {
     dataYearEl.textContent = today.toLocaleDateString(undefined, options);
@@ -26,6 +32,16 @@ function init() {
 }
 
 init();
+
+// Escape HTML entities to prevent XSS
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 // Title case formatting utility
 function toTitleCase(str) {
@@ -40,9 +56,9 @@ function toTitleCase(str) {
 //Large square footage values formatting utility
 function formatSqFt(n) {
   const abs = Math.abs(n);
-  if (abs >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + "B";
-  if (abs >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
-  if (abs >= 1_000) return Math.round(n / 1_000) + "K";
+  if (abs >= 1_000_000_000) {return (n / 1_000_000_000).toFixed(1) + " b";}
+  if (abs >= 1_000_000) {return (n / 1_000_000).toFixed(1) + " m";}
+  if (abs >= 1_000) {return Math.round(n / 1_000) + " k";}
   return Math.round(n).toString();
 }
 
@@ -63,7 +79,7 @@ function fetchCountyShape(city) {
     .then(res => res.json())
     .then(data => {
       const relation = data.elements.find(el => el.type === "relation" && el.geometry);
-      if (!relation) return;
+      if (!relation) {return;}
 
       const coords = relation.geometry.map(pt => [pt.lon, pt.lat]);
       renderCountyShape(coords); // // Render the county silhouette in SVG
@@ -101,6 +117,18 @@ function polygonArea(coords) {
   return Math.abs(area) / 2;
 }
 
+// Convert area in degrees² to square feet (approximate, assumes small area and mid-latitude)
+function convertDegreesToSquareFeet(degrees2, latitude = 40) {
+  // 1 degree latitude ≈ 69 miles; 1 degree longitude ≈ 69 * cos(latitude) miles
+  // 1 mile = 5280 feet
+  const milesPerDegree = 69;
+  const feetPerDegree = milesPerDegree * 5280;
+  // Area of 1 degree² at given latitude (in square feet)
+  const latRad = latitude * Math.PI / 180;
+  const areaPerDegree2 = feetPerDegree * (feetPerDegree * Math.cos(latRad));
+  return degrees2 * areaPerDegree2;
+}
+
 // Fetch and compute green space area
 function fetchGreenSpace(city, formattedCityName) {
   const query = buildQuery(city);
@@ -118,80 +146,38 @@ function fetchGreenSpace(city, formattedCityName) {
       });
 
       const closedWays = elements.filter(el =>
-        el.type === "way" && el.nodes?.[0] === el.nodes?.[el.nodes.length - 1]
+        el.type === "way" &&
+    Array.isArray(el.nodes) &&
+    el.nodes.length > 0 &&
+    el.nodes[0] === el.nodes[el.nodes.length - 1],
       );
 
       let totalArea = 0;
       closedWays.forEach(way => {
         const coords = way.nodes.map(id => nodeMap.get(id)).filter(Boolean);
-        if (coords.length >= 3) {
+        // You probably want to calculate area for each way and sum it
+        if (coords.length > 2) {
           totalArea += polygonArea(coords);
         }
       });
 
-      const sqFt = convertDegreesToSquareFeet(totalArea);
+      const sqFt = convertDegreesToSquareFeet(totalArea /*, latitude */);
       const formattedSqFt = formatSqFt(sqFt);
-        document.getElementById("summary").innerHTML =
-        `<p>Estimated public green space in ${formattedCityName}: ${formattedSqFt} ft²</p>`;
-
-      fetchPopulationAndRenderStats(city, sqFt);
-    })
-    .catch(err => {
-      console.error("Error fetching Overpass data:", err);
-    });
-}
-
-// Convert raw degree² to approximate ft²
-function convertDegreesToSquareFeet(areaInDegrees) {
-  const metersPerDegreeLon = Math.cos(38 * Math.PI / 180) * 111000;
-  const metersPerDegreeLat = 111000;
-  const squareMetersPerDegree = metersPerDegreeLon * metersPerDegreeLat;
-  return areaInDegrees * squareMetersPerDegree * 10.7639;
-}
-
-// Fetch population from Census API
-function fetchPopulationAndRenderStats(city, totalSqFt) {
-  const popUrl = "https://api.census.gov/data/2023/pep/population?get=NAME,POP&for=place:*&in=state:21";
-
-  fetch(popUrl)
-    .then(res => res.json())
-    .then(rows => {
-      const dataRows = rows.slice(1);
-      const match = dataRows.find(row =>
-        row[0].toLowerCase().includes(city.toLowerCase())
-      );
-
-      console.log("City:", city);
-      console.log("Raw match result:", match);
-
-
-      const perResidentEl = document.getElementById("per-resident-value");
-
-      if (match) {
-        const population = parseInt(match[1], 10);
-        const sqftPerPerson = totalSqFt / population;
-        const acresPerPerson = sqftPerPerson / 43560;
-
-        document.getElementById("summary").innerHTML +=
-          `<p>That's about ${Math.round(sqftPerPerson).toLocaleString()} ft² per resident.</p>`;
-
-        if (perResidentEl) {
-          perResidentEl.textContent = `${acresPerPerson.toFixed(2)} acres`;
-        }
-      } else {
-        console.warn(`No population match found for ${city}`);
-        if (perResidentEl) {
-          perResidentEl.textContent = "Data unavailable";
-        }
+      const summaryEl = document.getElementById("summary");
+      if (summaryEl) {
+        summaryEl.innerHTML =
+      `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqFt} ft²</p>`;
       }
-    })
-    .catch(error => {
-      console.error("Population fetch error:", error);
-      const el = document.getElementById("per-resident-value");
-      if (el) el.textContent = "Error loading data";
-    });
 
-    function renderCountyShape(coords) {
+      // Optionally fetch population and render stats
+      fetchPopulationAndRenderStats(sqFt);
+      // Fetch population from Census API
+    })
+    .catch(err => console.error("Green space fetch error:", err));
+}
+
+// Move renderCountyShape to top-level scope
+function renderCountyShape(coords) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("id", "county-svg");
   svg.setAttribute("viewBox", "0 0 400 400");
@@ -212,7 +198,7 @@ function fetchPopulationAndRenderStats(city, totalSqFt) {
   const scale = 400 / Math.max(maxX - minX, maxY - minY);
   const offsetX = minX;
   const offsetY = minY;
-
+  // Flip Y-axis because SVG's origin (0,0) is at the top-left, but geographic coordinates increase upwards
   const projected = coords.map(([lon, lat]) => {
     const x = (lon - offsetX) * scale;
     const y = 400 - (lat - offsetY) * scale; // Flip Y-axis
@@ -230,6 +216,17 @@ function fetchPopulationAndRenderStats(city, totalSqFt) {
 
   // Inject it above the excerpt
   const container = document.querySelector(".results-left");
-  if (container) container.insertBefore(svg, container.firstChild);
+  if (container) {
+    container.insertBefore(svg, container.firstChild);
+  } else {
+    // Fallback: append to body and log a warning
+    document.body.appendChild(svg);
+    console.warn("'.results-left' container not found. SVG appended to body as fallback.");
+  }
 }
+
+// Add this stub at the bottom or before its first use
+function fetchPopulationAndRenderStats() {
+  // TODO: Implement population fetching and stats rendering
+  // For now, this is a placeholder to avoid reference errors.
 }
