@@ -19,11 +19,10 @@ function init() {
     dataYearEl.textContent = today.toLocaleDateString(undefined, options);
   }
 
-  fetchGreenSpace(cityName);
+  fetchGreenSpace(cityName, formattedCityName);
   fetchCountyShape(cityName);
 }
 
-// Kick things off
 init();
 
 // Title case formatting utility
@@ -101,10 +100,7 @@ function polygonArea(coords) {
 }
 
 // Fetch and compute green space area
-fetchGreenSpace(cityName);
-fetchCountyShape(cityName);
-
-function fetchGreenSpace(city) {
+function fetchGreenSpace(city, formattedCityName) {
   const query = buildQuery(city);
   const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
