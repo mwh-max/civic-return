@@ -1,3 +1,5 @@
+//"Force rebuild for live JS sync"
+
 function init() {
   const params = new URLSearchParams(window.location.search);
   const cityName = params.get("city");
