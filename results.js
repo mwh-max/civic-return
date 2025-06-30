@@ -1,23 +1,30 @@
-const params = new URLSearchParams(window.location.search);
-const cityName = params.get("city");
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const cityName = params.get("city");
 
-if (!cityName) {
-  console.error("No city specified in the URL.");
-  document.getElementById("summary").textContent =
-    "Please specify a city in the URL to see a green space report.";
-  return;
+  if (!cityName) {
+    console.error("No city specified in the URL.");
+    document.getElementById("summary").textContent =
+      "Please specify a city in the URL to see a green space report.";
+    return;
+  }
+
+  const formattedCityName = toTitleCase(cityName);
+  document.getElementById("city-name").textContent = formattedCityName;
+
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long' };
+  const dataYearEl = document.getElementById("data-year");
+  if (dataYearEl) {
+    dataYearEl.textContent = today.toLocaleDateString(undefined, options);
+  }
+
+  fetchGreenSpace(cityName);
+  fetchCountyShape(cityName);
 }
 
-const formattedCityName = toTitleCase(cityName);
-document.getElementById("city-name").textContent = formattedCityName;
-
-const today = new Date();
-const options = { year: 'numeric', month: 'long'};
-const dataYearEl = document.getElementById("data-year");
-
-if (dataYearEl) {
-  dataYearEl.textContent = today.toLocaleDateString(undefined, options);
-}
+// Kick things off
+init();
 
 // Title case formatting utility
 function toTitleCase(str) {
