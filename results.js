@@ -1,6 +1,6 @@
 function init() {
   const params = new URLSearchParams(window.location.search);
-  const cityName = params.get("city");
+  const cityName = params.get("city") || "Lexington";
 
   if (!cityName) {
     console.error("No city specified in the URL.");
@@ -201,14 +201,14 @@ function renderCountyShape(coords) {
   path.setAttribute("fill", "#2e5d43");
   path.setAttribute("stroke", "none");
 
-  svg.appendChild(path);
+  svg.appendChild(path); 
 
-  const container = document.querySelector(".results-left");
+  const container = document.getElementById("county-svg-container");
   if (container) {
-    container.insertBefore(svg, container.firstChild);
+    container.innerHTML = "";
+    container.appendChild(svg);
   } else {
     document.body.appendChild(svg);
-    console.warn("'.results-left' container not found. SVG appended to body as fallback.");
   }
 }
 
@@ -222,15 +222,22 @@ function fetchPopulationAndRenderStats(sqFt) {
   fetch(apiUrl)
     .then(res => res.json())
     .then(data => {
-      
       const rows = data.slice(1);
-      // Find the row that matches your city
+      // Improved city matching logic
+      const normalize = s => s.toLowerCase().replace(/ city| town| village|, kentucky.*$/g, "").trim();
+      const normCity = normalize(formattedCity);
+
       const match = rows.find(row => {
-        const name = row[0].toLowerCase();
-        return name.startsWith(formattedCity.toLowerCase()) && name.includes("kentucky");
+        const name = row[0];
+        return normalize(name) === normCity;
       });
+
+      const perCapitaEl = document.querySelector(".per-capita");
       if (!match) {
         console.warn("City not found in Census data.");
+        if (perCapitaEl) {
+          perCapitaEl.textContent = "Population data not found.";
+        }
         return;
       }
 
@@ -238,10 +245,15 @@ function fetchPopulationAndRenderStats(sqFt) {
       const greenSpacePerPerson = sqFt / population;
 
       // Display the result
-      const perCapitaEl = document.querySelector(".per-capita");
       if (perCapitaEl) {
         perCapitaEl.textContent = `${Math.round(greenSpacePerPerson).toLocaleString()} ft² per person`;
       }
     })
-    .catch(err => console.error("Population fetch error:", err));
+    .catch(err => {
+      console.error("Population fetch error:", err);
+      const perCapitaEl = document.querySelector(".per-capita");
+      if (perCapitaEl) {
+        perCapitaEl.textContent = "Population data not available.";
+      }
+    });
 }
