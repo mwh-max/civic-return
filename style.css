@@ -251,12 +251,13 @@ p {
   }
 
   .results-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
   }
 
+}
 
 /* Mobile stacking */
 @media (max-width: 768px) {
@@ -272,4 +273,154 @@ p {
     padding-left: 0;
   }
 }
+
+/*Results Card Container*/
+
+.results-card {
+  display: flex;
+  flex-direction: wrap;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+  background-color: #fffef9;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  max-width: 960px;
+  margin: 3rem auto;
+}
+
+/* Vertical Stat Block */
+  .stat-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 280px;
+    background-color: #fdf7ef;
+    border: 2px solid #2e5d43;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.number-display {
+  font-family: 'Abril Fatface', serif;
+  font-size: 3.5rem;
+  font-weight: normal;
+  color: #2e5d43;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.per-capita {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  color: #4d604f;
+  letter-spacing: 0.05rem;
+}
+
+/* County Shape Visualization */
+#county-svg-container {
+  flex: 1;
+  min-width: 280px;
+  max-width: 420px;
+  text-align: center;
+  margin: 2rem auto 0;
+}
+
+#county-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+#county-svg path {
+  fill: #2e5d43;
+  opacity: 1;
+}
+
+/* Right-side Copy Block */
+.copy-block {
+  flex: 1;
+  min-width: 280px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1rem;
+  color: #3a3532;
+  line-height: 1.65;
+  margin-top: 1rem;
+}
+
+.copy-block ul {
+  padding-left: 1.2rem;
+  margin: 1rem 0;
+}
+
+.copy-block li {
+  margin-bottom: 0.6rem;
+}
+
+/* Dynamic Info Summary */
+.dynamic-info {
+  text-align: center;
+  margin-top: 2rem;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.05rem;
+  color: #4a4036;
+}
+
+/* Return Link */
+.nav-link {
+  font-family: 'Quicksand', sans-serif;
+  color: #2e5d43;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.nav-link a:hover {
+  text-decoration: underline;
+}
+
+/* Methodology Container */
+.methodology-container {
+  border: 2px solid #000;
+  border-radius: 6px;
+  background-color: #fefcf8;
+  padding: 2rem;
+  margin: 3rem auto;
+  max-width: 720px;
+  font-family: 'Quicksand', sans-serif;
+  line-height: 1.6;
+  color: #3a3532;
+}
+
+.methodology-container h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #2e2e2e;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  .results-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 2rem 1.5rem;
+  }
+
+  .stat-vertical,
+  .copy block,
+  #county-svg-container {
+    margin: 0 auto;
+  }
+
+  .copy block {
+    margin-top: 2rem;
+  }
 }
