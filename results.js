@@ -1,16 +1,6 @@
 function init() {
   const cityName = new URLSearchParams(window.location.search).get("city") || "Lexington";
 
-  if (!cityName) {
-    console.error("No city specified in the URL.");
-    const summaryEl = document.getElementById("summary");
-    if (summaryEl) {
-      summaryEl.textContent =
-        "Please specify a city in the URL to see a green space report.";
-    }
-    return;
-  }
-
   const formattedCityName = toTitleCase(cityName);
   const cityNameEl = document.getElementById("city-name");
   if (cityNameEl) {
@@ -55,6 +45,15 @@ function formatSqFt(n) {
   return Math.round(n).toString();
 }
 
+function normalizePlace(str) {
+  return str
+    .toLowerCase()
+    .replace(/ city| town| village| urban county| metropolitan government| consolidated city| municipality/g, "")
+    .replace(/, kentucky.*$/, "")
+    .replace(/-/g, " ")
+    .trim();
+}
+
 function buildCountyQuery(city) {
   return `
     [out:json][timeout:25];
@@ -97,14 +96,11 @@ function buildQuery(city) {
 
 function polygonArea(coords) {
   let area = 0;
-  const n = coords.length;
-
-  for (let i = 0; i < n - 1; i++) {
+  for (let i = 0; i < coords.length - 1; i++) {
     const [x1, y1] = coords[i];
     const [x2, y2] = coords[i + 1];
     area += x1 * y2 - x2 * y1;
   }
-
   return Math.abs(area) / 2;
 }
 
@@ -151,14 +147,11 @@ function fetchGreenSpace(city, formattedCityName) {
       const formattedSqFt = formatSqFt(sqFt);
 
       const numberEl = document.querySelector(".number-display");
-      if (numberEl) {
-        numberEl.textContent = formattedSqFt;
-      }
+      if (numberEl) {numberEl.textContent = formattedSqFt;}
 
       const summaryEl = document.getElementById("summary");
       if (summaryEl) {
-        summaryEl.innerHTML =
-          `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqFt} ft²</p>`;
+        summaryEl.innerHTML = `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqFt} ft²</p>`;
       }
 
       fetchPopulationAndRenderStats(sqFt);
@@ -194,13 +187,12 @@ function renderCountyShape(coords) {
   });
 
   const pathData = `M${projected.join(" L")} Z`;
-
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   path.setAttribute("d", pathData);
   path.setAttribute("fill", "#2e5d43");
   path.setAttribute("stroke", "none");
 
-  svg.appendChild(path); 
+  svg.appendChild(path);
 
   const container = document.getElementById("county-svg-container");
   if (container) {
@@ -212,23 +204,20 @@ function renderCountyShape(coords) {
 }
 
 function fetchPopulationAndRenderStats(sqFt) {
-  const city = new URLSearchParams(window.location.search).get("city");
+  const city = new URLSearchParams(window.location.search).get("city") || "Lexington";
   const formattedCity = toTitleCase(city);
+  const normCity = normalizePlace(formattedCity);
 
-  // Example: Replace with your real API endpoint
   const apiUrl = "https://api.census.gov/data/2020/dec/pl?get=NAME,P1_001N&for=place:*&in=state:21";
 
   fetch(apiUrl)
     .then(res => res.json())
     .then(data => {
       const rows = data.slice(1);
-      // Improved city matching logic
-      const normalize = s => s.toLowerCase().replace(/ city| town| village|, kentucky.*$/g, "").trim();
-      const normCity = normalize(formattedCity);
 
       const match = rows.find(row => {
         const name = row[0];
-        return normalize(name) === normCity;
+        return normalizePlace(name) === normCity;
       });
 
       const perCapitaEl = document.querySelector(".per-capita");
@@ -243,7 +232,6 @@ function fetchPopulationAndRenderStats(sqFt) {
       const population = parseInt(match[1], 10);
       const greenSpacePerPerson = sqFt / population;
 
-      // Display the result
       if (perCapitaEl) {
         perCapitaEl.textContent = `${Math.round(greenSpacePerPerson).toLocaleString()} ft² per person`;
       }
