@@ -1,6 +1,5 @@
 function init() {
-  const params = new URLSearchParams(window.location.search);
-  const cityName = params.get("city") || "Lexington";
+  const cityName = new URLSearchParams(window.location.search).get("city") || "Lexington";
 
   if (!cityName) {
     console.error("No city specified in the URL.");
