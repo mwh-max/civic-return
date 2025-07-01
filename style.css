@@ -84,6 +84,16 @@ p {
   margin: 1rem 0;
 }
 
+.per-capita {
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: #456c50; /* warm civic green */
+  text-align: center;
+  margin-top: -0.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.85;
+}
+
 .city-form label {
   font-weight: bold;
   margin-bottom: 0.5rem;
