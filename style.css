@@ -415,12 +415,12 @@ p {
   }
 
   .stat-vertical,
-  .copy block,
+  .copy-block,
   #county-svg-container {
     margin: 0 auto;
   }
 
-  .copy block {
+  .copy-block {
     margin-top: 2rem;
   }
 }
