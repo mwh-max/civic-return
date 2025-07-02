@@ -204,6 +204,11 @@ function renderCountyShape(coords) {
 }
 
 function fetchPopulationAndRenderStats(sqFt) {
+  const perCapitaEl = document.querySelector(".per-capita");
+  if (perCapitaEl) {
+    perCapitaEl.textContent = "Loading population data...";
+  }
+
   const city = new URLSearchParams(window.location.search).get("city") || "Lexington";
   const formattedCity = toTitleCase(city);
   const normCity = normalizePlace(formattedCity);
@@ -214,17 +219,15 @@ function fetchPopulationAndRenderStats(sqFt) {
     .then(res => res.json())
     .then(data => {
       const rows = data.slice(1);
+      const match = rows.find(row => normalizePlace(row[0]) === normCity);
 
-      const match = rows.find(row => {
-        const name = row[0];
-        return normalizePlace(name) === normCity;
-      });
-
-      const perCapitaEl = document.querySelector(".per-capita");
       if (!match) {
-        console.warn("City not found in Census data.");
+        console.warn(`No Census match for "${normCity}".`);
+        const nearby = rows.filter(row => normalizePlace(row[0]).includes(normCity));
+        console.warn("Possible nearby names:", nearby.map(row => row[0]));
+
         if (perCapitaEl) {
-          perCapitaEl.textContent = "Population data not found.";
+          perCapitaEl.textContent = `No population data for "${formattedCity}".`;
         }
         return;
       }
@@ -238,7 +241,6 @@ function fetchPopulationAndRenderStats(sqFt) {
     })
     .catch(err => {
       console.error("Population fetch error:", err);
-      const perCapitaEl = document.querySelector(".per-capita");
       if (perCapitaEl) {
         perCapitaEl.textContent = "Population data not available.";
       }
