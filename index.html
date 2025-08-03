@@ -1,36 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Civic Return</title>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap" rel="stylesheet" />
-  <link href="https://fonts.cdnfonts.com/css/nps-1935" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>Civic Return</h1>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Civic Return</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.cdnfonts.com/css/nps-1935" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Civic Return</h1>
+    </header>
 
-  <main>
-    <section class="site-intro">
-      <h2>What is Civic Return?</h2>
-      <p>
-        <strong>Civic Return</strong> quantifies the public green space available in Kentucky towns and cities — one square foot per person at a time.
-        By blending open data and clear design, it makes the invisible visible: how we invest in shared space and how equitably that space is distributed.
-      </p>
-    </section>
+    <main>
+      <section class="site-intro">
+        <h2>What is Civic Return?</h2>
+        <p>
+          <strong>Civic Return</strong> quantifies the public green space
+          available in Kentucky towns and cities — one square foot per person at
+          a time. By blending open data and clear design, it makes the invisible
+          visible: how we invest in shared space and how equitably that space is
+          distributed.
+        </p>
+      </section>
 
-    <form action="results.html" method="get" class="city-form">
-      <label for="city-input">Find your city's green space report:</label>
-      <input type="text" id="city-input" name="city" required placeholder="e.g., Lexington">
-      <button type="submit">View Report</button>
-    </form>
-  </main>
+      <form action="results.html" method="get" class="city-form">
+        <label for="city-input">Find your city's green space report:</label>
+        <input
+          type="text"
+          id="city-input"
+          name="city"
+          required
+          placeholder="e.g., Lexington"
+        />
+        <button type="submit">View Report</button>
+      </form>
+    </main>
 
-  <footer>
-    <p>Made in Lexington, Ky., by Sleeping Bear Labs</p>
-  </footer>
-</body>
+    <footer>
+      <p>Made in Lexington, Ky., by Sleeping Bear Labs</p>
+    </footer>
+
+    <script type="module" src="./js/init.js"></script>
+  </body>
 </html>
