@@ -2,8 +2,8 @@ import { normalizePlace } from "./utils.js";
 import { renderCountyShape } from "./render.js";
 
 // Fetches the county shape based on the city
-export function fetchCountyShape(city) {
-  const query = buildCountyQuery(city);
+export function fetchCountyShape(cityName) {
+  const query = buildCountyQuery(cityName);
   const url =
     "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
