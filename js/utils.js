@@ -8,6 +8,7 @@ export function escapeHtml(str) {
 }
 
 export function toTitleCase(str) {
+  str = String(str ?? "");
   return str
     .toLowerCase()
     .split(" ")
@@ -30,11 +31,12 @@ export function formatSqFt(n) {
 }
 
 export function normalizePlace(str) {
+  str = String(str ?? "");
   return str
     .toLowerCase()
     .replace(
       / city| town| village| urban county| metropolitan government| consolidated city| municipality/g,
-      "",
+      ""
     )
     .replace(/, kentucky.*$/, "")
     .replace(/-/g, " ")
