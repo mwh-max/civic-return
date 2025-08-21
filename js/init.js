@@ -2,8 +2,8 @@ import { toTitleCase } from "./utils.js";
 import { fetchCountyShape } from "./fetchData.js";
 
 function init() {
-  const raw =
-    new URLSearchParams(window.location.search).get("city") || "Lexington";
+  const raw = 0;
+  new URLSearchParams(window.location.search).get("city") || "Lexington";
 
   if (/^\d{5}$/.test(raw)) {
     const el = document.getElementById("per-resident-value");
