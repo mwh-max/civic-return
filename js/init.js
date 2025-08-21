@@ -1,8 +1,9 @@
 import { toTitleCase } from "./utils.js";
-import { fetchGreenSpace, fetchCountyShape } from './fetchData.js';
+import { fetchCountyShape } from "./fetchData.js";
 
 function init() {
-  const cityName = new URLSearchParams(window.location.search).get("city") || "Lexington";
+  const cityName =
+    new URLSearchParams(window.location.search).get("city") || "Lexington";
   const formattedCityName = toTitleCase(cityName);
 
   const cityNameEl = document.getElementById("city-name");
@@ -17,7 +18,12 @@ function init() {
     dataYearEl.textContent = today.toLocaleDateString(undefined, options);
   }
 
-  fetchGreenSpace(cityName, formattedCityName);
+  const ENABLE_GREENSPACE = false;
+
+  if (ENABLE_GREENSPACE && typeof fetchGreenSpace === "function") {
+    fetchGreenSpace(cityName, formattedCityName);
+  }
+
   fetchCountyShape(cityName);
 }
 

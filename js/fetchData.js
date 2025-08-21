@@ -24,7 +24,8 @@ export function fetchCountyShape(city) {
         throw new Error("No valid relation found in the response data.");
       }
       // Render the county shape if a valid relation is found
-      renderCountyShape(relation.geometry.coordinates);
+      const coords = relation.geometry.map((pt) => [pt.lon, pt.lat]);
+      renderCountyShape(coords);
     })
     .catch((error) => {
       console.error("Fetch error: ", error);

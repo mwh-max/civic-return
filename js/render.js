@@ -1,4 +1,9 @@
 export function renderCountyShape(coords) {
+  if (!Array.isArray(coords) || coords.length === 0) {
+    console.warn("[renderCountyShape] No coordinates to render.");
+    return;
+  }
+
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("id", "county-svg");
   svg.setAttribute("viewBox", "0 0 400 400");

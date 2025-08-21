@@ -34,7 +34,7 @@ export function normalizePlace(str) {
     .toLowerCase()
     .replace(
       / city| town| village| urban county| metropolitan government| consolidated city| municipality/g,
-      ""
+      "",
     )
     .replace(/, kentucky.*$/, "")
     .replace(/-/g, " ")
