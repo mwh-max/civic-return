@@ -33,6 +33,7 @@ export async function fetchCountyShape(cityName) {
     "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
   try {
+    console.log("[fetchCountyShape] query:\n", query);
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Overpass HTTP ${res.status}`);
     const data = await res.json();
