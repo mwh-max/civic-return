@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kentucky Counties — Simple Viewer</title>
+    <style>
+      :root {
+        --bg: #fffef9;
+        --fg: #2f4536;
+        --muted: #6b655f;
+        --accent: #2e5d43;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+      }
+      p.note {
+        margin: 4px 0 12px;
+        color: var(--muted);
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin: 12px 0 16px;
+      }
+      select,
+      input {
+        padding: 8px 10px;
+        border: 1px solid #c9c4bc;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--fg);
+      }
+      #stage {
+        border: 1px solid #e8e2d8;
+        background: #fdf7ef;
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      }
+      svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .meta {
+        margin-top: 10px;
+        color: #7a746d;
+        font-size: 14px;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #e9f2ec;
+        color: #244635;
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>Kentucky Counties</h1>
+          <p class="note">Local GeoJSON → SVG. No APIs, no build system.</p>
+        </div>
+        <div class="controls">
+          <label for="search">Find:</label>
+          <input
+            id="search"
+            type="text"
+            placeholder="Start typing… (e.g., Fayette)"
+          />
+          <label for="county">County:</label>
+          <select id="county"></select>
+        </div>
+      </header>
+
+      <div id="stage">
+        <svg
+          id="map"
+          viewBox="0 0 800 600"
+          width="800"
+          height="600"
+          aria-label="County map"
+        ></svg>
+      </div>
+      <div class="meta">
+        <span id="status">Loading…</span>
+        <span id="count" class="pill"></span>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // ------- config -------
+        const WIDTH = 800,
+          HEIGHT = 600;
+        const DATA_URL = "./data/us-counties.geojson"; // <= put file here; we filter to STATE === "21"
+
+        // ------- util -------
+        const $ = (sel) => document.querySelector(sel);
+        function extent(vals) {
+          return [Math.min(...vals), Math.max(...vals)];
+        }
+
+        // Project lon/lat to SVG coords (simple fit-to-box)
+        function fitProject(allRings) {
+          const xs = [],
+            ys = [];
+          for (const ring of allRings) {
+            for (const [x, y] of ring) {
+              xs.push(x);
+              ys.push(y);
+            }
+          }
+          const [minX, maxX] = extent(xs),
+            [minY, maxY] = extent(ys);
+          const spanX = Math.max(maxX - minX, 1e-9),
+            spanY = Math.max(maxY - minY, 1e-9);
+          const scale = Math.min(WIDTH / spanX, HEIGHT / spanY) * 0.92; // padding
+          const offX = minX - (WIDTH / scale - spanX) / 2;
+          const offY = minY - (HEIGHT / scale - spanY) / 2;
+
+          return ([x, y]) => {
+            const px = (x - offX) * scale;
+            const py = HEIGHT - (y - offY) * scale; // invert Y
+            return [px, py];
+          };
+        }
+
+        // Build path "d" from rings; handles Polygon or MultiPolygon, with holes
+        function ringsFromGeometry(geom) {
+          if (!geom) return [];
+          if (geom.type === "Polygon")
+            return geom.coordinates.map((ring) => ring);
+          if (geom.type === "MultiPolygon")
+            return geom.coordinates.flatMap((poly) => poly);
+          return [];
+        }
+        function pathD(rings, project) {
+          return rings
+            .map((r) => {
+              const seg = r
+                .map(project)
+                .map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`)
+                .join(" L ");
+              return `M ${seg} Z`;
+            })
+            .join(" ");
+        }
+
+        // ------- app -------
+        const svg = $("#map");
+        const status = $("#status");
+        const countPill = $("#count");
+        const countySel = $("#county");
+        const search = $("#search");
+
+        let ky = []; // filtered features (STATE === "21")
+        let byName = []; // [{name, f}, ...] sorted
+
+        function populateSelect(list) {
+          countySel.innerHTML = "";
+          for (const { name } of list) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            countySel.appendChild(opt);
+          }
+          countPill.textContent = `${list.length} counties`;
+        }
+
+        function drawFeature(f) {
+          const rings = ringsFromGeometry(f.geometry);
+          if (!rings.length) return;
+          const proj = fitProject(rings);
+          const d = pathD(rings, proj);
+          svg.setAttribute("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
+          svg.setAttribute("width", WIDTH);
+          svg.setAttribute("height", HEIGHT);
+          svg.innerHTML = "";
+          const ns = "http://www.w3.org/2000/svg";
+          const p = document.createElementNS(ns, "path");
+          p.setAttribute("d", d);
+          p.setAttribute("fill", "#2e5d43");
+          p.setAttribute("stroke", "none");
+          svg.appendChild(p);
+        }
+
+        function renderSelected() {
+          const name = countySel.value || byName[0]?.name;
+          const item = byName.find((x) => x.name === name) || byName[0];
+          if (item) {
+            drawFeature(item.f);
+            status.textContent = `Showing: ${item.name}`;
+          }
+        }
+
+        function applyFilter(q) {
+          const needle = q.trim().toLowerCase();
+          const list = needle
+            ? byName.filter((x) => x.name.toLowerCase().includes(needle))
+            : byName.slice();
+          populateSelect(list);
+          if (list.length) {
+            countySel.value = list[0].name;
+          }
+          renderSelected();
+        }
+
+        async function init() {
+          status.textContent = "Loading counties…";
+          const res = await fetch(DATA_URL);
+          if (!res.ok)
+            throw new Error(`Failed to load ${DATA_URL} (${res.status})`);
+          const gj = await res.json();
+
+          const features = gj.features || [];
+          // Kentucky only: STATE FIPS 21
+          ky = features.filter(
+            (f) =>
+              String(f.properties?.STATE || f.properties?.STATEFP || "") ===
+              "21"
+          );
+          if (!ky.length) {
+            // Some datasets use 'STATEFP' only; try again on that field set above (already tried).
+            throw new Error(
+              "No Kentucky features found in the GeoJSON. Check the file."
+            );
+          }
+
+          byName = ky
+            .map((f) => ({
+              name: String(
+                f.properties.NAME || f.properties.name || ""
+              ).replace(" County", ""),
+              f,
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+          populateSelect(byName);
+          renderSelected();
+
+          countySel.addEventListener("change", renderSelected);
+          search.addEventListener("input", (e) => applyFilter(e.target.value));
+          status.textContent = "Ready.";
+        }
+
+        init().catch((err) => {
+          status.textContent = "Error: " + err.message;
+          console.error(err);
+        });
+      })();
+    </script>
+  </body>
+</html>
