@@ -1,5 +1,6 @@
 function init() {
-  const cityName = new URLSearchParams(window.location.search).get("city") || "Lexington";
+  const cityName =
+    new URLSearchParams(window.location.search).get("city") || "Lexington";
 
   const formattedCityName = toTitleCase(cityName);
   const cityNameEl = document.getElementById("city-name");
@@ -33,22 +34,31 @@ function toTitleCase(str) {
   return str
     .toLowerCase()
     .split(" ")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
 function formatSqFt(n) {
   const abs = Math.abs(n);
-  if (abs >= 1_000_000_000) {return (n / 1_000_000_000).toFixed(1) + " b";}
-  if (abs >= 1_000_000) {return (n / 1_000_000).toFixed(1) + " m";}
-  if (abs >= 1_000) {return Math.round(n / 1_000) + " k";}
+  if (abs >= 1_000_000_000) {
+    return (n / 1_000_000_000).toFixed(1) + " b";
+  }
+  if (abs >= 1_000_000) {
+    return (n / 1_000_000).toFixed(1) + " m";
+  }
+  if (abs >= 1_000) {
+    return Math.round(n / 1_000) + " k";
+  }
   return Math.round(n).toString();
 }
 
 function normalizePlace(str) {
   return str
     .toLowerCase()
-    .replace(/ city| town| village| urban county| metropolitan government| consolidated city| municipality/g, "")
+    .replace(
+      / city| town| village| urban county| metropolitan government| consolidated city| municipality/g,
+      "",
+    )
     .replace(/, kentucky.*$/, "")
     .replace(/-/g, " ")
     .trim();
@@ -65,18 +75,23 @@ function buildCountyQuery(city) {
 
 function fetchCountyShape(city) {
   const query = buildCountyQuery(city);
-  const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
+  const url =
+    "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
   fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      const relation = data.elements.find(el => el.type === "relation" && el.geometry);
-      if (!relation) {return;}
+    .then((res) => res.json())
+    .then((data) => {
+      const relation = data.elements.find(
+        (el) => el.type === "relation" && el.geometry,
+      );
+      if (!relation) {
+        return;
+      }
 
-      const coords = relation.geometry.map(pt => [pt.lon, pt.lat]);
+      const coords = relation.geometry.map((pt) => [pt.lon, pt.lat]);
       renderCountyShape(coords);
     })
-    .catch(err => console.error("County shape fetch error:", err));
+    .catch((err) => console.error("County shape fetch error:", err));
 }
 
 function buildQuery(city) {
@@ -107,37 +122,40 @@ function polygonArea(coords) {
 function convertDegreesToSquareFeet(degrees2, latitude = 40) {
   const milesPerDegree = 69;
   const feetPerDegree = milesPerDegree * 5280;
-  const latRad = latitude * Math.PI / 180;
-  const areaPerDegree2 = feetPerDegree * (feetPerDegree * Math.cos(latRad));
+  const latRad = (latitude * Math.PI) / 180;
+  const cosLat = Math.cos(latRad);
+  const areaPerDegree2 = feetPerDegree * cosLat * (feetPerDegree * cosLat);
   return degrees2 * areaPerDegree2;
 }
 
 function fetchGreenSpace(city, formattedCityName) {
   const query = buildQuery(city);
-  const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
+  const url =
+    "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
   fetch(url)
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       const elements = data.elements;
       const nodeMap = new Map();
 
-      elements.forEach(el => {
+      elements.forEach((el) => {
         if (el.type === "node") {
           nodeMap.set(el.id, [el.lon, el.lat]);
         }
       });
 
-      const closedWays = elements.filter(el =>
-        el.type === "way" &&
-        Array.isArray(el.nodes) &&
-        el.nodes.length > 0 &&
-        el.nodes[0] === el.nodes[el.nodes.length - 1],
+      const closedWays = elements.filter(
+        (el) =>
+          el.type === "way" &&
+          Array.isArray(el.nodes) &&
+          el.nodes.length > 0 &&
+          el.nodes[0] === el.nodes[el.nodes.length - 1],
       );
 
       let totalArea = 0;
-      closedWays.forEach(way => {
-        const coords = way.nodes.map(id => nodeMap.get(id)).filter(Boolean);
+      closedWays.forEach((way) => {
+        const coords = way.nodes.map((id) => nodeMap.get(id)).filter(Boolean);
         if (coords.length > 2) {
           totalArea += polygonArea(coords);
         }
@@ -147,7 +165,9 @@ function fetchGreenSpace(city, formattedCityName) {
       const formattedSqFt = formatSqFt(sqFt);
 
       const numberEl = document.querySelector(".number-display");
-      if (numberEl) {numberEl.textContent = formattedSqFt;}
+      if (numberEl) {
+        numberEl.textContent = formattedSqFt;
+      }
 
       const summaryEl = document.getElementById("summary");
       if (summaryEl) {
@@ -156,7 +176,7 @@ function fetchGreenSpace(city, formattedCityName) {
 
       fetchPopulationAndRenderStats(sqFt);
     })
-    .catch(err => console.error("Green space fetch error:", err));
+    .catch((err) => console.error("Green space fetch error:", err));
 }
 
 function renderCountyShape(coords) {
@@ -209,22 +229,29 @@ function fetchPopulationAndRenderStats(sqFt) {
     perCapitaEl.textContent = "Loading population data...";
   }
 
-  const city = new URLSearchParams(window.location.search).get("city") || "Lexington";
+  const city =
+    new URLSearchParams(window.location.search).get("city") || "Lexington";
   const formattedCity = toTitleCase(city);
   const normCity = normalizePlace(formattedCity);
 
-  const apiUrl = "https://api.census.gov/data/2020/dec/pl?get=NAME,P1_001N&for=place:*&in=state:21";
+  const apiUrl =
+    "https://api.census.gov/data/2020/dec/pl?get=NAME,P1_001N&for=place:*&in=state:21";
 
   fetch(apiUrl)
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       const rows = data.slice(1);
-      const match = rows.find(row => normalizePlace(row[0]) === normCity);
+      const match = rows.find((row) => normalizePlace(row[0]) === normCity);
 
       if (!match) {
         console.warn(`No Census match for "${normCity}".`);
-        const nearby = rows.filter(row => normalizePlace(row[0]).includes(normCity));
-        console.warn("Possible nearby names:", nearby.map(row => row[0]));
+        const nearby = rows.filter((row) =>
+          normalizePlace(row[0]).includes(normCity),
+        );
+        console.warn(
+          "Possible nearby names:",
+          nearby.map((row) => row[0]),
+        );
 
         if (perCapitaEl) {
           perCapitaEl.textContent = `No population data for "${formattedCity}".`;
@@ -233,13 +260,21 @@ function fetchPopulationAndRenderStats(sqFt) {
       }
 
       const population = parseInt(match[1], 10);
+
+      if (population === 0) {
+        if (perCapitaEl) {
+          perCapitaEl.textContent = "Population data unavailable.";
+        }
+        return;
+      }
+
       const greenSpacePerPerson = sqFt / population;
 
       if (perCapitaEl) {
         perCapitaEl.textContent = `${Math.round(greenSpacePerPerson).toLocaleString()} ft² per person`;
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.error("Population fetch error:", err);
       if (perCapitaEl) {
         perCapitaEl.textContent = "Population data not available.";
