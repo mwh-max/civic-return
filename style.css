@@ -47,10 +47,17 @@ p {
   max-width: 720px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #fdf7ef;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
   box-sizing: border-box;
+}
+
+.results-hero {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  text-align: center;
 }
 
 .results-header {
@@ -79,16 +86,23 @@ p {
 
 .number-display {
   font-family: "NPS 1935", serif;
-  font-size: 3.5rem;
+  font-size: 5rem;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
   color: #3e5b3a;
   text-align: center;
-  margin: 1rem 0;
+  margin: 1rem 0 0.5rem 0;
   line-height: 1;
 }
 
-.per-capita {
+.city-name {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #3a3532;
+  text-align: center;
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
   font-size: 1.25rem;
   font-weight: 400;
   color: #456c50; /* warm civic green */

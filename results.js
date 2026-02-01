@@ -8,6 +8,11 @@ function init() {
     cityNameEl.textContent = formattedCityName;
   }
 
+  const cityNameDisplayEl = document.getElementById("city-name-display");
+  if (cityNameDisplayEl) {
+    cityNameDisplayEl.textContent = formattedCityName;
+  }
+
   const today = new Date();
   const options = { year: "numeric", month: "long" };
   const dataYearEl = document.getElementById("data-year");
