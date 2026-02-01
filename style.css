@@ -1,44 +1,46 @@
 body {
   background-color: #fffef9;
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 1.1rem;
   margin: 0;
   padding: 2rem;
   color: #2f4536;
 }
 
-header, main, footer {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 2rem;
+header,
+main,
+footer {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
 h1 {
-    font-family: 'NPS 1935', serif;
-    font-size: 3.2rem;
-    color: #3e5b3a;
-    margin-bottom: 0.2em;
+  font-family: "NPS 1935", serif;
+  font-size: 3.2rem;
+  color: #3e5b3a;
+  margin-bottom: 0.2em;
 }
 
 h2 {
-    font-size: 1.5rem;
-    color: #4a4036;
-    margin-top: 2rem;
+  font-size: 1.5rem;
+  color: #4a4036;
+  margin-top: 2rem;
 }
 
 footer {
-    font-size: 0.9rem;
-    color: #6b655f;
-    text-align: center;
-    padding-top: 1rem;
-    border-top: 1px solid #ddd6ce;
-    margin-top: 4rem;
+  font-size: 0.9rem;
+  color: #6b655f;
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd6ce;
+  margin-top: 4rem;
 }
 
 p {
-    font-size: 1.1rem;
-    margin-top: 0.5rem;
-    color: #3a3532;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  color: #3a3532;
 }
 
 .page-box {
@@ -56,11 +58,11 @@ p {
 }
 
 .site-intro {
-    background-color: #e7e1d4;
-    padding: 1.5rem;
-    border-left: 5px solid #8b7c6e;
-    margin-top: 1rem;
-    border-radius: 4px;
+  background-color: #e7e1d4;
+  padding: 1.5rem;
+  border-left: 5px solid #8b7c6e;
+  margin-top: 1rem;
+  border-radius: 4px;
 }
 
 .city-form {
@@ -94,6 +96,16 @@ p {
   opacity: 0.85;
 }
 
+.square-miles {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #666;
+  text-align: center;
+  margin-top: -1.5rem;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
 .city-form label {
   font-weight: bold;
   margin-bottom: 0.5rem;
@@ -124,7 +136,7 @@ p {
 }
 
 .city-name {
-  font-family: 'NPS 1935', serif;
+  font-family: "NPS 1935", serif;
   font-size: 2.5rem;
   margin: 0;
   text-align: left;
@@ -149,7 +161,7 @@ p {
 }
 
 .stat-value {
-  font-family: 'NPS 1935', serif;
+  font-family: "NPS 1935", serif;
   font-size: 3.5rem;
   margin: 0;
 }
@@ -180,20 +192,20 @@ p {
   align-items: flex-start;
 }
 
- #county-svg {
+#county-svg {
   max-width: 100%;
   height: auto;
   display: block;
   margin-bottom: 2rem;
- }
+}
 
-  #county-svg path {
+#county-svg path {
   fill: #2e5d43; /* rich dark green */
   opacity: 1;
- }
+}
 
-
-.results-left, .results-right {
+.results-left,
+.results-right {
   flex: 1;
 }
 
@@ -208,7 +220,9 @@ p {
     font-size: 1rem;
   }
 
-  header, main, footer {
+  header,
+  main,
+  footer {
     padding: 1.5rem 1rem;
   }
 
@@ -228,7 +242,8 @@ p {
     font-size: 2.5rem;
   }
 
-  .stat-focus, .site-intro {
+  .stat-focus,
+  .site-intro {
     margin-bottom: 1.5rem;
   }
 
@@ -256,7 +271,6 @@ p {
     align-items: flex-start;
     gap: 2rem;
   }
-
 }
 
 /* Mobile stacking */
@@ -292,22 +306,22 @@ p {
 }
 
 /* Vertical Stat Block */
-  .stat-vertical {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    min-width: 280px;
-    background-color: #fdf7ef;
-    border: 2px solid #2e5d43;
-    border-radius: 10px;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+.stat-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 280px;
+  background-color: #fdf7ef;
+  border: 2px solid #2e5d43;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
 }
 
 .number-display {
-  font-family: 'Abril Fatface', serif;
+  font-family: "Abril Fatface", serif;
   font-size: 3.5rem;
   font-weight: normal;
   color: #2e5d43;
@@ -316,7 +330,7 @@ p {
 }
 
 .per-capita {
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
   text-transform: uppercase;
@@ -349,7 +363,7 @@ p {
 .copy-block {
   flex: 1;
   min-width: 280px;
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-size: 1rem;
   color: #3a3532;
   line-height: 1.65;
@@ -369,14 +383,14 @@ p {
 .dynamic-info {
   text-align: center;
   margin-top: 2rem;
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   font-size: 1.05rem;
   color: #4a4036;
 }
 
 /* Return Link */
 .nav-link {
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   color: #2e5d43;
   font-weight: bold;
   text-decoration: none;
@@ -394,13 +408,13 @@ p {
   padding: 2rem;
   margin: 3rem auto;
   max-width: 720px;
-  font-family: 'Quicksand', sans-serif;
+  font-family: "Quicksand", sans-serif;
   line-height: 1.6;
   color: #3a3532;
 }
 
 .methodology-container h2 {
-  font-family: 'EB Garamond', serif;
+  font-family: "EB Garamond", serif;
   font-size: 1.25rem;
   margin-bottom: 0.75rem;
   color: #2e2e2e;

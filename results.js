@@ -41,15 +41,20 @@ function toTitleCase(str) {
 function formatSqFt(n) {
   const abs = Math.abs(n);
   if (abs >= 1_000_000_000) {
-    return (n / 1_000_000_000).toFixed(1) + " b";
+    return (n / 1_000_000_000).toFixed(1) + " billion ft²";
   }
   if (abs >= 1_000_000) {
-    return (n / 1_000_000).toFixed(1) + " m";
+    return (n / 1_000_000).toFixed(1) + " million ft²";
   }
   if (abs >= 1_000) {
-    return Math.round(n / 1_000) + " k";
+    return Math.round(n / 1_000) + "k ft²";
   }
-  return Math.round(n).toString();
+  return Math.round(n).toString() + " ft²";
+}
+
+function formatSquareMiles(sqFt) {
+  const sqMiles = sqFt / (5280 * 5280);
+  return sqMiles.toFixed(1) + " sq mi";
 }
 
 function normalizePlace(str) {
@@ -163,15 +168,21 @@ function fetchGreenSpace(city, formattedCityName) {
 
       const sqFt = convertDegreesToSquareFeet(totalArea);
       const formattedSqFt = formatSqFt(sqFt);
+      const formattedSqMiles = formatSquareMiles(sqFt);
 
       const numberEl = document.querySelector(".number-display");
       if (numberEl) {
         numberEl.textContent = formattedSqFt;
       }
 
+      const squareMilesEl = document.querySelector(".square-miles");
+      if (squareMilesEl) {
+        squareMilesEl.textContent = formattedSqMiles;
+      }
+
       const summaryEl = document.getElementById("summary");
       if (summaryEl) {
-        summaryEl.innerHTML = `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqFt} ft²</p>`;
+        summaryEl.innerHTML = `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqMiles}</p>`;
       }
 
       fetchPopulationAndRenderStats(sqFt);
@@ -241,7 +252,29 @@ function fetchPopulationAndRenderStats(sqFt) {
     .then((res) => res.json())
     .then((data) => {
       const rows = data.slice(1);
-      const match = rows.find((row) => normalizePlace(row[0]) === normCity);
+
+      // Try exact match first
+      let match = rows.find((row) => normalizePlace(row[0]) === normCity);
+
+      // If no exact match, try partial match (e.g., "Lexington" matches "Lexington-Fayette")
+      if (!match) {
+        const partialMatches = rows.filter((row) => {
+          const normRow = normalizePlace(row[0]);
+          return (
+            normRow.startsWith(normCity) ||
+            normCity.split(" ").some((word) => normRow.includes(word))
+          );
+        });
+
+        if (partialMatches.length > 0) {
+          // Prefer exact word boundary matches
+          match =
+            partialMatches.find((row) => {
+              const normRow = normalizePlace(row[0]);
+              return normRow.split(" ")[0] === normCity.split(" ")[0];
+            }) || partialMatches[0];
+        }
+      }
 
       if (!match) {
         console.warn(`No Census match for "${normCity}".`);
@@ -254,7 +287,7 @@ function fetchPopulationAndRenderStats(sqFt) {
         );
 
         if (perCapitaEl) {
-          perCapitaEl.textContent = `No population data for "${formattedCity}".`;
+          perCapitaEl.textContent = `No population data for "${formattedCity}". Try another city.`;
         }
         return;
       }
