@@ -38,25 +38,6 @@ function toTitleCase(str) {
     .join(" ");
 }
 
-function formatSqFt(n) {
-  const abs = Math.abs(n);
-  if (abs >= 1_000_000_000) {
-    return (n / 1_000_000_000).toFixed(1) + " billion ft²";
-  }
-  if (abs >= 1_000_000) {
-    return (n / 1_000_000).toFixed(1) + " million ft²";
-  }
-  if (abs >= 1_000) {
-    return Math.round(n / 1_000) + "k ft²";
-  }
-  return Math.round(n).toString() + " ft²";
-}
-
-function formatSquareMiles(sqFt) {
-  const sqMiles = sqFt / (5280 * 5280);
-  return sqMiles.toFixed(1) + " sq mi";
-}
-
 function normalizePlace(str) {
   return str
     .toLowerCase()
@@ -167,22 +148,10 @@ function fetchGreenSpace(city, formattedCityName) {
       });
 
       const sqFt = convertDegreesToSquareFeet(totalArea);
-      const formattedSqFt = formatSqFt(sqFt);
-      const formattedSqMiles = formatSquareMiles(sqFt);
-
-      const numberEl = document.querySelector(".number-display");
-      if (numberEl) {
-        numberEl.textContent = formattedSqFt;
-      }
-
-      const squareMilesEl = document.querySelector(".square-miles");
-      if (squareMilesEl) {
-        squareMilesEl.textContent = formattedSqMiles;
-      }
 
       const summaryEl = document.getElementById("summary");
       if (summaryEl) {
-        summaryEl.innerHTML = `<p>Estimated public green space in ${escapeHtml(formattedCityName)}: ${formattedSqMiles}</p>`;
+        summaryEl.innerHTML = `<p>Public green space in ${escapeHtml(formattedCityName)}</p>`;
       }
 
       fetchPopulationAndRenderStats(sqFt);
