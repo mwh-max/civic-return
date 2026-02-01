@@ -78,12 +78,14 @@ p {
 }
 
 .number-display {
-  font-size: 2rem;
+  font-family: "NPS 1935", serif;
+  font-size: 3.5rem;
   font-weight: bold;
   font-variant-numeric: tabular-nums;
-  color: #2a2a2a;
+  color: #3e5b3a;
   text-align: center;
   margin: 1rem 0;
+  line-height: 1;
 }
 
 .per-capita {
