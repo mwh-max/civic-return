@@ -1,6 +1,6 @@
 // county-viewer.js — Kentucky greenspace choropleth
 (function () {
-  const WIDTH = 800, HEIGHT = 600;
+  const WIDTH = 800, HEIGHT = 280;
   const DATA_URL = "./data/us-counties.geojson";
 
   // ------- util -------
@@ -155,9 +155,10 @@
       svg.appendChild(path);
     }
 
-    // Search — highlight matching counties
+    // Search — highlight matching counties and dim the rest
     search.addEventListener("input", (e) => {
       const needle = e.target.value.trim().toLowerCase();
+      svg.classList.toggle("searching", needle.length > 0);
       for (const path of svg.querySelectorAll("path")) {
         const match = needle.length > 0 && path.dataset.name.toLowerCase().includes(needle);
         path.classList.toggle("highlighted", match);
@@ -165,7 +166,7 @@
     });
 
     countPill.textContent = `${ky.length} counties`;
-    status.textContent = "Hover a county to explore.";
+    status.textContent = "";
   }
 
   init().catch((err) => {

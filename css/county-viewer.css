@@ -32,6 +32,19 @@ h1 {
   text-transform: uppercase;
   color: var(--fg);
 }
+p.byline {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+p.byline a {
+  color: var(--muted);
+  text-decoration: none;
+}
+p.byline a:hover {
+  text-decoration: underline;
+}
 p.description {
   max-width: 620px;
   margin: 0 auto 16px;
@@ -81,6 +94,9 @@ svg {
   stroke: var(--fg);
   stroke-width: 2;
   opacity: 1;
+}
+#map.searching path:not(.highlighted) {
+  opacity: 0.2;
 }
 
 /* Legend */
