@@ -151,6 +151,12 @@
       path.addEventListener("mouseenter", (e) => showTooltip(e, name, sqft));
       path.addEventListener("mousemove", moveTooltip);
       path.addEventListener("mouseleave", hideTooltip);
+      path.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        showTooltip({ clientX: t.clientX, clientY: t.clientY }, name, sqft);
+      }, { passive: false });
+      path.addEventListener("touchend", hideTooltip);
 
       svg.appendChild(path);
     }

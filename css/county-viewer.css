@@ -161,6 +161,13 @@ svg {
   font-style: italic;
 }
 
+/* Mobile */
+@media (max-width: 600px) {
+  body { padding: 16px; }
+  h1 { font-size: 36px; }
+  p.description { font-size: 14px; }
+}
+
 /* Tooltip */
 #tooltip {
   position: fixed;
