@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/county-viewer.css">
+    <link rel="stylesheet" href="./css/county-viewer.css?v=2">
   </head>
   <body>
     <div class="wrap">
@@ -24,6 +24,15 @@
         <div class="controls">
           <label for="search">Find a county:</label>
           <input id="search" type="text" placeholder="County name…" />
+          <div class="toggle-group">
+            <span class="toggle-label">View Mode</span>
+            <div class="toggle-switch">
+              <input type="radio" name="view-mode" id="view-mode-total" value="total" checked />
+              <label for="view-mode-total">Total Green Space</label>
+              <input type="radio" name="view-mode" id="view-mode-transit" value="transit" />
+              <label for="view-mode-transit">Transit-Accessible Only</label>
+            </div>
+          </div>
         </div>
       </header>
 
