@@ -80,6 +80,11 @@
 
   function updateMetricPill(d) {
     const mode = getViewMode();
+    console.log("[updateMetricPill]", {
+      county: d.name,
+      entry: { sqft: d.sqft, transitSqftPerPerson: d.transitSqftPerPerson },
+      viewMode: mode,
+    });
     if (mode === "transit") {
       const val = d.transitSqftPerPerson;
       if (!val) return "No transit data";
@@ -134,10 +139,9 @@
       path.addEventListener("mousemove", moveTooltip);
       path.addEventListener("mouseleave", hideTooltip);
       path.addEventListener("touchstart", (e) => {
-        e.preventDefault();
         const t = e.touches[0];
         showTooltip({ clientX: t.clientX, clientY: t.clientY }, d);
-      }, { passive: false });
+      }, { passive: true });
       path.addEventListener("touchend", hideTooltip);
 
       svg.appendChild(path);

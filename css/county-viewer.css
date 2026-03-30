@@ -161,6 +161,43 @@ svg {
   font-style: italic;
 }
 
+/* View mode toggle */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toggle-label {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.toggle-switch {
+  display: flex;
+  border: 1px solid #c9c4bc;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.toggle-switch input[type="radio"] {
+  display: none;
+}
+.toggle-switch label {
+  padding: 7px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.toggle-switch input[type="radio"]:checked + label {
+  background: var(--accent);
+  color: #fff;
+}
+.toggle-switch label:not(:last-child) {
+  border-right: 1px solid #c9c4bc;
+}
+
 /* Mobile */
 @media (max-width: 600px) {
   body { padding: 16px; }
