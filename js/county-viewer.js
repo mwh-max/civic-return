@@ -13,8 +13,12 @@
     return [Math.min(...vals), Math.max(...vals)];
   }
 
+  function getViewMode() {
+    const checked = document.querySelector('input[name="view-mode"]:checked');
+    return checked ? checked.value : "total";
+  }
+
   // ------- projection -------
-  // Fits ALL county rings into the SVG canvas at once (shared coordinate space)
   function fitProject(allRings) {
     const xs = [], ys = [];
     for (const ring of allRings) for (const [x, y] of ring) { xs.push(x); ys.push(y); }
@@ -25,7 +29,7 @@
     const offY = minY - (HEIGHT / scale - spanY) / 2;
     return ([x, y]) => {
       const px = (x - offX) * scale;
-      const py = HEIGHT - (y - offY) * scale; // invert Y for SVG
+      const py = HEIGHT - (y - offY) * scale;
       return [px, py];
     };
   }
@@ -47,9 +51,6 @@
   }
 
   // ------- color scale -------
-  // Uses log scale so extreme outliers don't wash out the middle range.
-  // Interpolates from pale green (low) to deep forest green (high).
-  // Counties with no public land data get a warm gray.
   function lerp(a, b, t) { return a + (b - a) * t; }
   function toHex(n) {
     return Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, "0");
@@ -57,6 +58,7 @@
 
   function makeColorScale(values) {
     const nonzero = values.filter((v) => v > 0);
+    if (!nonzero.length) return () => "#e8e2d8";
     const logMin = Math.log(Math.min(...nonzero));
     const logMax = Math.log(Math.max(...nonzero));
     return function (val) {
@@ -69,14 +71,28 @@
     };
   }
 
+  // ------- metric helpers -------
+  function getMetricForCounty(d) {
+    const mode = getViewMode();
+    if (mode === "transit") return d.transitSqftPerPerson;
+    return d.sqft;
+  }
+
+  function updateMetricPill(d) {
+    const mode = getViewMode();
+    if (mode === "transit") {
+      const val = d.transitSqftPerPerson;
+      if (!val) return "No transit data";
+      return `${fmtInt(val)} transit-accessible sq ft / person`;
+    }
+    return d.sqft !== null ? `${fmtInt(d.sqft)} sq ft / person` : "No public land data";
+  }
+
   // ------- tooltip -------
   const tooltip = $("#tooltip");
 
-  function showTooltip(e, name, sqft) {
-    const metric = sqft !== null
-      ? `${fmtInt(sqft)} sq ft / person`
-      : "No public land data";
-    tooltip.innerHTML = `<strong>${name}</strong><br>${metric}`;
+  function showTooltip(e, d) {
+    tooltip.innerHTML = `<strong>${d.name}</strong><br>${updateMetricPill(d)}`;
     tooltip.style.display = "block";
     moveTooltip(e);
   }
@@ -96,18 +112,56 @@
   const countPill = $("#count");
   const search    = $("#search");
 
+  // ------- render -------
+  function renderMap(countyData, project) {
+    const metric = countyData.map((d) => getMetricForCounty(d));
+    const colorScale = makeColorScale(metric.filter((v) => v !== null));
+
+    svg.innerHTML = "";
+    const ns = "http://www.w3.org/2000/svg";
+
+    for (let i = 0; i < countyData.length; i++) {
+      const d = countyData[i];
+      const rings = ringsFromGeometry(d.f.geometry);
+      if (!rings.length) continue;
+
+      const path = document.createElementNS(ns, "path");
+      path.setAttribute("d", pathD(rings, project));
+      path.setAttribute("fill", colorScale(metric[i]));
+      path.dataset.name = d.name;
+
+      path.addEventListener("mouseenter", (e) => showTooltip(e, d));
+      path.addEventListener("mousemove", moveTooltip);
+      path.addEventListener("mouseleave", hideTooltip);
+      path.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        showTooltip({ clientX: t.clientX, clientY: t.clientY }, d);
+      }, { passive: false });
+      path.addEventListener("touchend", hideTooltip);
+
+      svg.appendChild(path);
+    }
+
+    // Re-apply search highlight state after re-render
+    const needle = search.value.trim().toLowerCase();
+    svg.classList.toggle("searching", needle.length > 0);
+    for (const path of svg.querySelectorAll("path")) {
+      const match = needle.length > 0 && path.dataset.name.toLowerCase().includes(needle);
+      path.classList.toggle("highlighted", match);
+    }
+  }
+
   // ------- init -------
   async function init() {
     status.textContent = "Loading…";
 
-    // Load greenspace metrics
     let metricsMap = new Map();
     if (typeof window.loadKyMetrics === "function") {
       const raw = await window.loadKyMetrics();
       raw.forEach((v, k) => metricsMap.set(countyKey(k), v));
     }
 
-    // Load GeoJSON and filter to Kentucky (STATE FIPS 21)
     const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status})`);
     const gj = await res.json();
@@ -117,51 +171,29 @@
     );
     if (!ky.length) throw new Error("No Kentucky features found in the GeoJSON.");
 
-    // Attach metric to each county feature
     const countyData = ky.map((f) => {
       const name = String(f.properties.NAME || "").replace(/ County$/i, "").trim();
       const entry = metricsMap.get(countyKey(name));
       const sqft = (entry && typeof window.formatSqftPerPerson === "function")
         ? window.formatSqftPerPerson(entry.acres, entry.pop)
         : null;
-      return { name, f, sqft };
+      const transitSqftPerPerson = (entry && entry.transitSqft && entry.pop)
+        ? entry.transitSqft / entry.pop
+        : null;
+      return { name, f, sqft, transitSqftPerPerson };
     });
 
-    // Single projection fitted to the whole state
     const allRings = ky.flatMap((f) => ringsFromGeometry(f.geometry));
     const project = fitProject(allRings);
 
-    // Color scale built from all non-null sq ft values
-    const allSqft = countyData.map((d) => d.sqft).filter((v) => v !== null);
-    const colorScale = makeColorScale(allSqft);
+    renderMap(countyData, project);
 
-    // Draw all 120 counties
-    svg.innerHTML = "";
-    const ns = "http://www.w3.org/2000/svg";
+    // Toggle listener
+    document.querySelectorAll('input[name="view-mode"]').forEach((radio) => {
+      radio.addEventListener("change", () => renderMap(countyData, project));
+    });
 
-    for (const { name, f, sqft } of countyData) {
-      const rings = ringsFromGeometry(f.geometry);
-      if (!rings.length) continue;
-
-      const path = document.createElementNS(ns, "path");
-      path.setAttribute("d", pathD(rings, project));
-      path.setAttribute("fill", colorScale(sqft));
-      path.dataset.name = name;
-
-      path.addEventListener("mouseenter", (e) => showTooltip(e, name, sqft));
-      path.addEventListener("mousemove", moveTooltip);
-      path.addEventListener("mouseleave", hideTooltip);
-      path.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        const t = e.touches[0];
-        showTooltip({ clientX: t.clientX, clientY: t.clientY }, name, sqft);
-      }, { passive: false });
-      path.addEventListener("touchend", hideTooltip);
-
-      svg.appendChild(path);
-    }
-
-    // Search — highlight matching counties and dim the rest
+    // Search
     search.addEventListener("input", (e) => {
       const needle = e.target.value.trim().toLowerCase();
       svg.classList.toggle("searching", needle.length > 0);

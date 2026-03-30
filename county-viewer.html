@@ -24,6 +24,15 @@
         <div class="controls">
           <label for="search">Find a county:</label>
           <input id="search" type="text" placeholder="County name…" />
+          <div class="toggle-group">
+            <span class="toggle-label">View Mode</span>
+            <div class="toggle-switch">
+              <input type="radio" name="view-mode" id="view-mode-total" value="total" checked />
+              <label for="view-mode-total">Total Green Space</label>
+              <input type="radio" name="view-mode" id="view-mode-transit" value="transit" />
+              <label for="view-mode-transit">Transit-Accessible Only</label>
+            </div>
+          </div>
         </div>
       </header>
 

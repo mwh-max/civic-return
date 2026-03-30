@@ -1,2 +1,8 @@
 # Raw source data — download from USGS ScienceBase (PAD-US 4.1 Kentucky)
 data/PADUS4_1_StateKY.gdb/
+
+# Large binary data formats
+*.zip
+*.kmz
+*.gdb
+*.gpkg

@@ -43,6 +43,7 @@
       "acreage",
     ]);
     const popIdx = findIdx(["population", "pop", "people"]);
+    const transitIdx = findIdx(["transit_accessible_sqft"]);
 
     const map = new Map();
 
@@ -54,8 +55,9 @@
 
       const acres = toNumLoose(cols[acresIdx]);
       const pop = toNumLoose(cols[popIdx]);
+      const transitSqft = transitIdx != null ? toNumLoose(cols[transitIdx]) : null;
 
-      map.set(normalizeCountyName(rawName), { acres, pop });
+      map.set(normalizeCountyName(rawName), { acres, pop, transitSqft });
     }
     return map;
   }
