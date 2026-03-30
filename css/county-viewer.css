@@ -161,6 +161,16 @@ svg {
   font-style: italic;
 }
 
+/* Mode description */
+.mode-description {
+  max-width: 520px;
+  margin: 0 auto 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  font-style: italic;
+}
+
 /* View mode toggle */
 .toggle-group {
   display: flex;

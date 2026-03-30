@@ -193,8 +193,16 @@
     renderMap(countyData, project);
 
     // Toggle listener
+    const modeDescription = $("#mode-description");
+    const modeText = {
+      total: "Showing total publicly accessible green space per resident, regardless of transit access.",
+      transit: "Showing only green space within a 5-minute walk (400m) of a Lextran bus stop. Only Fayette County has transit data currently. All other counties show no data for this metric.",
+    };
     document.querySelectorAll('input[name="view-mode"]').forEach((radio) => {
-      radio.addEventListener("change", () => renderMap(countyData, project));
+      radio.addEventListener("change", () => {
+        renderMap(countyData, project);
+        if (modeDescription) modeDescription.textContent = modeText[getViewMode()];
+      });
     });
 
     // Search
