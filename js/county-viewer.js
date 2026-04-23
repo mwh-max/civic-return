@@ -87,7 +87,7 @@
     });
     if (mode === "transit") {
       const val = d.transitSqftPerPerson;
-      if (!val) return "No transit data";
+      if (!val) return "Transit data is currently available for Fayette County only. Other counties will be added as data is validated.";
       return `${fmtInt(val)} transit-accessible sq ft / person`;
     }
     return d.sqft !== null ? `${fmtInt(d.sqft)} sq ft / person` : "No public land data";
