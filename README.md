@@ -27,6 +27,27 @@ Transit-accessible green space is calculated for Fayette County using GTFS data 
 
 ---
 
+## JavaScript structure
+
+All front-end logic lives in two vanilla JS files loaded as plain `<script>` tags.
+
+**`js/ky-metrics.js`** — data loader, exposes two globals:
+- `loadKyMetrics()` — fetches and parses `ky-greenspace-population.csv` into a `Map` keyed by normalized county name.
+- `formatSqftPerPerson(acres, pop)` — converts acres + population into a square-feet-per-person value.
+
+**`js/county-viewer.js`** — choropleth renderer, self-contained IIFE:
+- `minMax(vals)` — returns `[min, max]` of an array of numbers.
+- `fitProject(allRings)` — builds a scale-and-translate projection function that fits all GeoJSON rings into the fixed SVG canvas.
+- `ringsFromGeometry(geom)` — flattens a GeoJSON Polygon or MultiPolygon into a flat array of coordinate rings.
+- `buildSvgPath(rings, project)` — converts coordinate rings into an SVG `d` attribute string.
+- `makeColorScale(values)` — returns a logarithmic color-interpolation function for the choropleth fill.
+- `getMetricForCounty(d)` — returns the relevant numeric metric for a county given the active view mode.
+- `formatCountyLabel(d)` — returns the formatted tooltip string for a county.
+- `renderMap(countyData, project)` — (re-)renders all county `<path>` elements with current colors and event listeners.
+- `init()` — fetches GeoJSON and CSV, wires up the search input and view-mode toggle, kicks off the first render.
+
+---
+
 ## Data pipeline
 
 The `pipeline/` folder contains the full Python processing pipeline. Raw data files are excluded from version control (see `pipeline/.gitignore`) and must be downloaded separately.

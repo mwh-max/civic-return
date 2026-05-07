@@ -9,7 +9,7 @@
   const countyKey = (name) =>
     String(name || "").replace(/ County$/i, "").trim().toLowerCase();
 
-  function extent(vals) {
+  function minMax(vals) {
     return [Math.min(...vals), Math.max(...vals)];
   }
 
@@ -22,7 +22,7 @@
   function fitProject(allRings) {
     const xs = [], ys = [];
     for (const ring of allRings) for (const [x, y] of ring) { xs.push(x); ys.push(y); }
-    const [minX, maxX] = extent(xs), [minY, maxY] = extent(ys);
+    const [minX, maxX] = minMax(xs), [minY, maxY] = minMax(ys);
     const spanX = Math.max(maxX - minX, 1e-9), spanY = Math.max(maxY - minY, 1e-9);
     const scale = Math.min(WIDTH / spanX, HEIGHT / spanY) * 0.92;
     const offX = minX - (WIDTH / scale - spanX) / 2;
@@ -41,7 +41,7 @@
     return [];
   }
 
-  function pathD(rings, project) {
+  function buildSvgPath(rings, project) {
     return rings
       .map((r) => {
         const seg = r.map(project).map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" L ");
@@ -78,16 +78,16 @@
     return d.sqft;
   }
 
-  function updateMetricPill(d) {
+  function formatCountyLabel(d) {
     const mode = getViewMode();
-    console.log("[updateMetricPill]", {
+    console.log("[formatCountyLabel]", {
       county: d.name,
       entry: { sqft: d.sqft, transitSqftPerPerson: d.transitSqftPerPerson },
       viewMode: mode,
     });
     if (mode === "transit") {
       const val = d.transitSqftPerPerson;
-      if (!val) return "No transit data";
+      if (!val) return "Transit data is currently available for Fayette County only. Other counties will be added as data is validated.";
       return `${fmtInt(val)} transit-accessible sq ft / person`;
     }
     return d.sqft !== null ? `${fmtInt(d.sqft)} sq ft / person` : "No public land data";
@@ -97,7 +97,7 @@
   const tooltip = $("#tooltip");
 
   function showTooltip(e, d) {
-    tooltip.innerHTML = `<strong>${d.name}</strong><br>${updateMetricPill(d)}`;
+    tooltip.innerHTML = `<strong>${d.name}</strong><br>${formatCountyLabel(d)}`;
     tooltip.style.display = "block";
     moveTooltip(e);
   }
@@ -131,7 +131,7 @@
       if (!rings.length) continue;
 
       const path = document.createElementNS(ns, "path");
-      path.setAttribute("d", pathD(rings, project));
+      path.setAttribute("d", buildSvgPath(rings, project));
       path.setAttribute("fill", colorScale(metric[i]));
       path.dataset.name = d.name;
 
